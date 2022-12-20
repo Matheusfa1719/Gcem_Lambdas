@@ -26,10 +26,10 @@ provider:
     USERS_TABLE: ${self:custom.userTableName}
 
 functions:
-  app:
+  findUser:
     handler: index.handler
     events:
-      - httpApi: '*'
+      - httpApi: 'GET /users/:id'
   createUser:
     handler: index.handler
     events:

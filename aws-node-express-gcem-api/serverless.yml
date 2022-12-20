@@ -1,0 +1,62 @@
+org: matheus1719
+app: aws-node-express-gcem-api
+service: aws-node-express-gcem-api
+frameworkVersion: '3'
+
+custom:
+  userTableName: 'cg-users-table-${sls:stage}'
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:Query
+            - dynamodb:Scan
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+          Resource:
+            - Fn::GetAtt: [ UsersTable, Arn ]
+  environment:
+    USERS_TABLE: ${self:custom.userTableName}
+
+functions:
+  app:
+    handler: index.handler
+    events:
+      - httpApi: '*'
+  createUser:
+    handler: index.handler
+    events:
+      - httpApi: 'POST /users'
+resources:
+  Resources:
+    UsersTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: userId
+            AttributeType: S
+          - AttributeName: email
+            AttributeType: S
+        KeySchema:
+          - AttributeName: userId
+            KeyType: HASH
+        GlobalSecondaryIndexes:
+          - IndexName: email-index
+            KeySchema:
+              - AttributeName: email
+                KeyType: HASH
+            Projection:
+              ProjectionType: 'ALL'
+        BillingMode: PAY_PER_REQUEST
+        TableName: ${self:custom.userTableName}
+
+	
+plugins:
+  - serverless-offline

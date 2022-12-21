@@ -5,9 +5,10 @@ const tables = {
   userTable: process.env.USERS_TABLE
 }
 
-const generateParamsGet = (tableName, key) => {
+const generateParamsGet = (tableName, index, key) => {
   return {
     TableName: tableName,
+    IndexName: index,
     Key: {
       ...key
     }
@@ -37,11 +38,25 @@ const find = async (params) => {
   return Item;
 }
 
+const findUserByEmail = async (email) => {
+  const params = {
+    TableName: tables.userTable,
+    IndexName: 'email-index',
+    KeyConditionExpression: 'email = :email',
+    ExpressionAttributeValues: {
+      ':email': email
+    }
+  };
+  const { Items } = await dynamoDbClient.query(params).promise();
+  return Items[0];
+}
+
 
 module.exports = {
     generateParamsGet,
     generateParamsPut,
     create,
     find,
+    findUserByEmail,
     tables
 }

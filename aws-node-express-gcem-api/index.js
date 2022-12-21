@@ -24,7 +24,7 @@ app.post("/users", async function (req, res) {
     res.status(201).json({ success: true, data: createdUser });
   } catch (err) {
     console.log("***CreateUser Error", err);
-    res.status(500).json({ error: "Could not create user" });
+    ErrorHandler(err, req, res);
   }
 });
 

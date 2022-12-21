@@ -12,15 +12,10 @@ const findUser = async (id) => {
 };
 
 const createUser = async (payload) => {
-  const userEmailparams = dynamoService.generateParamsGet(
-    dynamoService.tables.userTable,
-    {
-      email: payload.email,
-    }
-  );
-  console.log(userEmailparams);
-  const user = await dynamoService.find(userEmailparams);
-  console.log(user);
+  const user = await dynamoService.findUserByEmail(payload.email);
+  if (user) {
+    throw { statusCode: 400, message: "User already exists" };
+  }
   const userId = crypto.randomUUID();
   const createdAt = Date.now();
   const data = { userId, createdAt, ...payload };
